@@ -1,6 +1,9 @@
 import Navbar from "~/components/Navbar";
 import {resumes} from "../../constants";
 import ResumeCard from "~/components/ResumeCard";
+import {usePuterStore} from "~/lib/puter";
+import {useLocation, useNavigate} from "react-router";
+import {useEffect} from "react";
 
 
 export function meta() {
@@ -11,23 +14,40 @@ export function meta() {
 }
 
 export default function Home() {
-  return <main className="bg-[url('/images/bg-main.svg')] bg-cover">
-    <Navbar />
-    <section className="main-section py-16">
-      <div className="page-heading py-16">
-        <h1>Track your Applications & Resume Ratings</h1>
-        <h2>Review your submissions and check AI powered feedback.</h2>
-      </div>
+    const { auth} = usePuterStore();
+    const navigate = useNavigate();
 
-      {resumes.length > 0 && (
-          <div className="resume-section flex flex-col gap-8 w-full max-w-5xl mx-auto">
-            {resumes.map((resume) => (
-                <ResumeCard key={resume.id} resume={resume} />
-            ))}
-          </div>
-      )}
-    </section>
-  </main>
+    useEffect(() => {
+        if (!auth.isAuthenticated) navigate('/auth?next=/');
+    }, [auth.isAuthenticated])
+
+    return (
+        <main className="bg-[url('/images/bg-main.svg')] bg-cover min-h-screen">
+            <Navbar/>
+
+            <section className="main-section px-6 py-16">
+                <div className="page-heading text-center mb-12">
+                    <h1 className="text-4xl font-bold">
+                        Track Your Applications & Resume Ratings
+                    </h1>
+                    <h2 className="text-lg text-gray-600 mt-2">
+                        Review your submissions and check AI-powered feedback.
+                    </h2>
+                </div>
+
+                {resumes.length > 0 && (
+                    <div
+                        className="resume-section grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 w-full max-w-6xl mx-auto">
+                        {resumes.map((resume) => (
+                            <ResumeCard key={resume.id} resume={resume}/>
+                        ))}
+                    </div>
+                )}
+            </section>
+        </main>
+    );
 }
+
+
 
 
