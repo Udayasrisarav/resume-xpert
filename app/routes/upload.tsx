@@ -7,7 +7,6 @@ import { convertPdfToImage } from "~/lib/pdf2img";
 import { generateUUID } from "~/lib/utils";
 import { prepareInstructions } from "../../constants";
 
-// Define a type for feedback response
 interface FeedbackMessage {
     content: string | { text: string }[];
 }
@@ -68,20 +67,20 @@ const Upload = () => {
 
             setStatusText("Analyzing...");
 
-            // 🚧 Temporary mock while quota resets
+            //Temporary mock while quota resets
             const feedback: Feedback = {
                 message: {
                     content: JSON.stringify({
-                        overallScore: 85,
-                        ATS: { match: "High", keywords: ["React", "JavaScript", "Frontend"] },
-                        toneAndStyle: { tone: "Professional", style: "Concise" },
-                        content: { clarity: "Excellent", relevance: "Strong" },
-                        structure: { layout: "Clean and readable" },
-                    }),
+                            "overallScore": 85,
+                            "toneAndStyle": { "score": 70, "tone": "Professional", "style": "Concise" },
+                            "content": { "score": 80, "clarity": "Excellent", "relevance": "Strong" },
+                            "structure": { "score": 75, "layout": "Clean and readable" },
+                            "skills": { "score": 65, "keywords": ["React", "JavaScript"] }
+                        }
+                    ),
                 },
             };
 
-            // ✅ Type‑safe extraction
             let feedbackText: string;
 
             if (typeof feedback.message.content === "string") {
