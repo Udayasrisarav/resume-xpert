@@ -7,6 +7,14 @@ import { convertPdfToImage } from "~/lib/pdf2img";
 import { generateUUID } from "~/lib/utils";
 import { prepareInstructions } from "../../constants";
 
+// Define a type for feedback response
+interface FeedbackMessage {
+    content: string | { text: string }[];
+}
+interface Feedback {
+    message: FeedbackMessage;
+}
+
 const Upload = () => {
     const { auth, isLoading, fs, ai, kv } = usePuterStore();
     const navigate = useNavigate();
@@ -60,17 +68,35 @@ const Upload = () => {
 
             setStatusText("Analyzing...");
 
-            const feedback = await ai.feedback(
-                uploadedFile.path,
-                prepareInstructions({ jobTitle, jobDescription })
-            );
-            if (!feedback) return setStatusText("Error: Failed to analyze resume");
+            // 🚧 Temporary mock while quota resets
+            const feedback: Feedback = {
+                message: {
+                    content: JSON.stringify({
+                        overallScore: 85,
+                        ATS: { match: "High", keywords: ["React", "JavaScript", "Frontend"] },
+                        toneAndStyle: { tone: "Professional", style: "Concise" },
+                        content: { clarity: "Excellent", relevance: "Strong" },
+                        structure: { layout: "Clean and readable" },
+                    }),
+                },
+            };
 
-            // 🔑 Clean and parse safely
-            let feedbackText =
-                typeof feedback.message.content === "string"
-                    ? feedback.message.content
-                    : feedback.message.content[0].text;
+            // ✅ Type‑safe extraction
+            let feedbackText: string;
+
+            if (typeof feedback.message.content === "string") {
+                feedbackText = feedback.message.content;
+            } else if (
+                Array.isArray(feedback.message.content) &&
+                feedback.message.content.length > 0 &&
+                typeof feedback.message.content[0].text === "string"
+            ) {
+                feedbackText = feedback.message.content[0].text;
+            } else {
+                console.error("Unexpected feedback format:", feedback.message.content);
+                setStatusText("Error: Invalid feedback format");
+                return;
+            }
 
             feedbackText = feedbackText.replace(/```json|```/g, "").trim();
 
@@ -87,7 +113,7 @@ const Upload = () => {
             await kv.set(`resume:${uuid}`, JSON.stringify(data));
             setStatusText("Analysis complete, redirecting...");
             console.log(data);
-
+            navigate(`/resume/${uuid}`);
         } catch (err) {
             console.error(err);
             setStatusText("Error during analysis");
