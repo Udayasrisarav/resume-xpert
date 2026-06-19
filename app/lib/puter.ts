@@ -1,22 +1,4 @@
 import { create } from "zustand";
-export async function analyzeResume(file: File) {
-    const formData = new FormData();
-    formData.append("file", file);
-
-    const response = await fetch("https://api.puter.com/ai/feedback", {
-        method: "POST",
-        headers: {
-            "Authorization": `Bearer ${import.meta.env.VITE_PUTER_API_KEY}`,
-        },
-        body: formData,
-    });
-
-    if (!response.ok) {
-        throw new Error(`API error: ${response.statusText}`);
-    }
-
-    return await response.json();
-}
 
 declare global {
     interface Window {
@@ -368,7 +350,7 @@ export const usePuterStore = create<PuterStore>((set, get) => {
                     ],
                 },
             ],
-            { model: "gpt-5.4-nano" }
+            { model: "gpt-4o-mini" }
         ) as Promise<AIResponse | undefined>;
     };
 

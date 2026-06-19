@@ -17,10 +17,16 @@ app.post("/api/analyze", upload.single("file"), async (req, res) => {
         const response = await fetch("https://api.puter.com/ai/feedback", {
             method: "POST",
             headers: {
-                "Authorization": `Bearer ${process.env.PUTER_API_KEY}`,
+                "Authorization": `Bearer ${process.env.VITE_PUTER_API_KEY}`,
             },
             body: formData,
         });
+        if (!response.ok) {
+            console.error("Upstream error:", response.status, response.statusText);
+            return res
+                .status(response.status)
+                .json({ error: "API quota exhausted or unauthorized" });
+        }
 
         const text = await response.text();
 
