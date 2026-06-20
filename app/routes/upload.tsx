@@ -6,9 +6,10 @@ import {useNavigate} from "react-router";
 import {convertPdfToImage} from "~/lib/pdf2img";
 import {generateUUID} from "~/lib/utils";
 import {prepareInstructions} from "../../constants";
+import { getFeedback } from "~/lib/ai";
 
 const Upload = () => {
-    const { auth, isLoading, fs, ai, kv } = usePuterStore();
+    const { fs, kv } = usePuterStore();
     const navigate = useNavigate();
     const [isProcessing, setIsProcessing] = useState(false);
     const [statusText, setStatusText] = useState('');
@@ -46,17 +47,28 @@ const Upload = () => {
 
         setStatusText('Analyzing...');
 
-        const feedback = await ai.feedback(
-            uploadedFile.path,
-            prepareInstructions({companyName,jobTitle,jobDescription})
-        )
-        if (!feedback) return setStatusText('Error: Failed to analyze resume');
+        const feedbackRaw = await getFeedback(
+            prepareInstructions({ companyName, jobTitle, jobDescription })
+        );
 
-        const feedbackText = typeof feedback.message.content === 'string'
-            ? feedback.message.content
-            : feedback.message.content[0].text;
+        if (!feedbackRaw) {
+            setStatusText("Error: No feedback returned from AI");
+            return;
+        }
 
-        data.feedback = JSON.parse(feedbackText);
+        let parsedFeedback;
+        try {
+            // feedbackRaw is usually a JSON string from OpenRouter
+            parsedFeedback = typeof feedbackRaw === "string"
+                ? JSON.parse(feedbackRaw)
+                : feedbackRaw;
+        } catch (err) {
+            console.error("Failed to parse feedback:", feedbackRaw);
+            setStatusText("Error: Invalid feedback format");
+            return;
+        }
+
+        data.feedback = parsedFeedback;
         await kv.set(`resume:${uuid}`, JSON.stringify(data));
         setStatusText('Analysis complete, redirecting...');
         console.log(data);
