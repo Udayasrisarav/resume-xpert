@@ -23,3 +23,16 @@ git clone https://github.com/Udayasrisarav/resume-xpert.git
 cd resume-xpert
 npm install
 npm run dev
+```
+
+The app will be available at 
+http://localhost:5173
+
+🔗 Live Demo
+👉 ResumeXpert on Vercel (https://resume-xpert-8qyy-odppwqw2u-udayasri.vercel.app)
+
+🤝 Contributing
+Contributions, issues, and feature requests are welcome!
+Feel free to fork the repo and submit a pull request.
+
+Built by Udayaaa :)
